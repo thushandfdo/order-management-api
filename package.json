@@ -1,0 +1,39 @@
+{
+    "name": "order-management-api",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.ts",
+    "scripts": {
+        "start": "nodemon",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "Thushan D. Fernando",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/body-parser": "^1.19.2",
+        "@types/compression": "^1.7.3",
+        "@types/cookie-parser": "^1.4.4",
+        "@types/cors": "^2.8.14",
+        "@types/express": "^4.17.17",
+        "@types/lodash": "^4.14.198",
+        "@typescript-eslint/eslint-plugin": "^6.6.0",
+        "@typescript-eslint/parser": "^6.6.0",
+        "eslint": "^8.49.0",
+        "eslint-plugin-react": "^7.33.2",
+        "nodemon": "^3.0.1",
+        "ts-node": "^10.9.1",
+        "typescript": "^5.2.2"
+    },
+    "dependencies": {
+        "axios": "^1.5.0",
+        "body-parser": "^1.20.2",
+        "compression": "^1.7.4",
+        "cookie-parser": "^1.4.6",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "lodash": "^4.17.21",
+        "mongoose": "^7.5.0"
+    }
+}
