@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
 
 export interface IOrder {
-    id: string;
+    id?: string;
     customerId: number;
+    customerName?: string;
     products: Array<object>;
     dateTime?: string;
 }
@@ -10,14 +11,15 @@ export interface IOrder {
 const orderSchema = new mongoose.Schema({
     customerId: { type: Number, required: true },
     products: { type: Array, required: true },
-    dateTime: { type: String, required: true }
+    dateTime: { type: String, required: true },
+    price: { type: Number, required: true }
 });
 
 export const Orders = mongoose.model('Orders', orderSchema);
 
 export const getOrders = () => Orders.find();
 export const getOrderById = (id: string) => Orders.findById(id);
-export const getOrderByDateAndTime = (dateTime: string) => Orders.findOne({ 'dateTime': dateTime });
+export const getOrderByCustomerAndProducts = (customerId: number, products: any) => Orders.findOne({ 'dateTime': customerId, 'products': products });
 
 export const createOrder = (values: Record<string, any>) => new Orders(values)
     .save().then((order) => {
@@ -27,7 +29,8 @@ export const createOrder = (values: Record<string, any>) => new Orders(values)
             id: o._id,
             customerId: o.customerId,
             products: o.products,
-            dateTime: o.dateTime
+            dateTime: o.dateTime,
+            price: o.price
         };
     }
 );

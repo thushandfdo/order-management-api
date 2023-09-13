@@ -1,4 +1,5 @@
-import { IOrder, createOrder, deleteOrderById, getOrderByDateAndTime, getOrderById, getOrders } from '../models/order.model';
+import { IOrder, createOrder, deleteOrderById, getOrderByCustomerAndProducts, getOrderById, getOrders } from '../models/order.model';
+import { getAllProductsService, getUserByIdService, updateStoreService } from './external.service';
 
 export const getAllOrdersService = async () => {
     try {
@@ -8,7 +9,8 @@ export const getAllOrdersService = async () => {
             id: order._id,
             customerId: order.customerId,
             products: order.products,
-            dateTime: order.dateTime
+            dateTime: order.dateTime,
+            price: order.price
         }));
     }
     catch (error) {
@@ -23,19 +25,57 @@ export const addOrderService = async (newOrder: IOrder) => {
             throw new Error('Missing fields');
         }
 
-        const order = await getOrderByDateAndTime(newOrder.dateTime);
+        const customer = await getUserByIdService(newOrder.customerId);
 
-        if (order) {
-            throw new Error('User already exists');
+        if (!customer) {
+            throw new Error(`Customer (id: ${newOrder.customerId}) not found`);
         }
 
-        const newUser = await createOrder({
-            customerId: newOrder.customerId,
-            products: newOrder.products,
-            dateTime: new Date()
+        newOrder.customerName = customer.firstName + ' ' + customer.lastName;
+
+        const excisingOrder = await getOrderByCustomerAndProducts(newOrder.customerId, newOrder.products);
+
+        if (excisingOrder) {
+            throw new Error('Order already exists');
+        }
+
+        const customerProducts = newOrder.products;
+
+        const productsList = await getAllProductsService();
+
+        let price = 0;
+
+        customerProducts.map((customerProduct: any) => {
+            const product = productsList.find((product: any) => customerProduct.id === product.id);
+
+            if (!product) {
+                throw new Error(`Product (id: ${customerProduct.id}) not found`);
+            }
+
+            if (product.quantity < customerProduct.quantity) {
+                throw new Error(`Product (${customerProduct.id}: ${product.name}) quantity is not enough`);
+            }
+
+            price += product.price * customerProduct.quantity;
+            customerProduct.availableQuantity = product.quantity - customerProduct.quantity;
+            customerProduct.price = product.price * customerProduct.quantity;
+            customerProduct.name = product.name;
         });
 
-        return newUser;
+        await updateStoreService(customerProducts);
+
+        await createOrder({
+            customerId: newOrder.customerId,
+            products: [...customerProducts.map((customerProduct: any) => ({
+                id: customerProduct.id,
+                quantity: customerProduct.quantity,
+                price: customerProduct.price,
+            }))],
+            dateTime: new Date(),
+            price: price
+        });
+
+        return newOrder;
     }
     catch (error) {
         console.error(error);
@@ -61,7 +101,8 @@ export const updateOrderService = async (id: string, updatedOrder: IOrder) => {
             id: order._id,
             customerId: order.customerId,
             products: order.products,
-            dateTime: order.dateTime
+            dateTime: order.dateTime,
+            price: order.price
         };
     }
     catch (error) {
@@ -82,7 +123,8 @@ export const deleteOrderService = async (id: string) => {
             id: deletedOrder._id,
             customerId: deletedOrder.customerId,
             products: deletedOrder.products,
-            dateTime: deletedOrder.dateTime
+            dateTime: deletedOrder.dateTime,
+            price: deletedOrder.price
         };
     }
     catch (error) {
